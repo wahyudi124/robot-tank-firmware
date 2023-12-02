@@ -151,43 +151,43 @@ void setup_wifi() {
   
 }
 
-void callback(String& topic, String& payload) {
+void messageReceived(String &topic, String &payload) {
   Serial.print("Message arrived [");
-  Serial.print(topic);
+  Serial.print(payload);
   Serial.print("] ");
   
-  if (topic == "/tank") {
-    // Parse the payload for this specific topic
-    StaticJsonDocument<200> doc;
-    DeserializationError error = deserializeJson(doc, payload);
+  // if (topic == "/tank") {
+  //   // Parse the payload for this specific topic
+  //   StaticJsonDocument<200> doc;
+  //   DeserializationError error = deserializeJson(doc, payload);
 
-    // Test if parsing succeeds.
-    if (error) {
-      Serial.print(F("deserializeJson() failed: "));
-      Serial.println(error.f_str());
-      return;
-    }
+  //   // Test if parsing succeeds.
+  //   if (error) {
+  //     Serial.print(F("deserializeJson() failed: "));
+  //     Serial.println(error.f_str());
+  //     return;
+  //   }
 
-    int x = doc["x"];
-    int y = doc["y"];
+  //   int x = doc["x"];
+  //   int y = doc["y"];
 
-    if(y > 0) {
-      moveCar(FORWARD);
-    } else if(y < 0) {
-      moveCar(BACKWARD);
-    } else if(x > 0) {
-      moveCar(RIGHT);
-    } else if(x < 0) {
-      moveCar(LEFT);
-    } else {
-      moveCar(STOP);
-    }
-  } else if (topic == "/cam") {
-    // Handle another specific topic
-    // ...
-  } else {
-    Serial.println("Unknown topic");
-  }
+  //   if(y > 0) {
+  //     moveCar(FORWARD);
+  //   } else if(y < 0) {
+  //     moveCar(BACKWARD);
+  //   } else if(x > 0) {
+  //     moveCar(RIGHT);
+  //   } else if(x < 0) {
+  //     moveCar(LEFT);
+  //   } else {
+  //     moveCar(STOP);
+  //   }
+  // } else if (topic == "/cam") {
+  //   // Handle another specific topic
+  //   // ...
+  // } else {
+  //   Serial.println("Unknown topic");
+  // }
 }
 
 
@@ -275,7 +275,7 @@ void setup() {
   cameraInit();
   client.begin("103.84.207.210", 1883, espClient);
   client.setCleanSession(true);
-  client.onMessage(callback);
+  client.onMessage(messageReceived);
 }
 
 void loop() {
