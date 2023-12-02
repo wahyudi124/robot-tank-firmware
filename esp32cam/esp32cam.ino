@@ -22,8 +22,8 @@ struct MOTOR_PINS
 
 std::vector<MOTOR_PINS> motorPins = 
 {
-  {2, 12, 13}, //RIGHT_MOTOR Pins (EnA, IN1, IN2)
-  {2, 1, 3},  //LEFT_MOTOR  Pins (EnB, IN3, IN4)
+  {12, 13, 15}, //RIGHT_MOTOR Pins (EnA, IN1, IN2)
+  {4, 14, 2},  //LEFT_MOTOR  Pins (EnB, IN3, IN4)
 };
 
 
