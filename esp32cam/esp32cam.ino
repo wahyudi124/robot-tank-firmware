@@ -10,6 +10,11 @@ const char* password = "........";
 const char* mqtt_server = "103.84.207.210";
 
 
+unsigned long previousMillis = 0;        // will store last time LED was updated
+
+// constants won't change:
+const long interval = 150;
+
 // Pin untuk mengontrol motor kiri
 int enA = 12;  // Pin PWM
 int in1 = 13;
@@ -265,4 +270,18 @@ void loop() {
   }
   client.loop();
   if(client.connected()) grabImage();
+
+
+  if (!client.connected()) {
+    reconnect();
+  }
+  else {
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval) {
+      // save the last time you blinked the LED
+      previousMillis = currentMillis;
+      grabImage();
+    }
+  }
+  client.loop();
 }
