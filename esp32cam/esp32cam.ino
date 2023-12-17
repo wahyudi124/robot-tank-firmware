@@ -16,6 +16,8 @@ unsigned long previousMillis = 0;        // will store last time LED was updated
 const long interval = 150;
 
 
+#define LEDPIN 4
+
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
 #define XCLK_GPIO_NUM      0
@@ -35,59 +37,6 @@ const long interval = 150;
 #define PCLK_GPIO_NUM     22
 
 #define MQTT_PUBLISH_CAM_TOPIC "esp32/cam_0"
-
-
-// Pin untuk mengontrol motor kiri
-int enA = 12;  // Pin PWM
-int in1 = 13;
-int in2 = 15;
-
-// Pin untuk mengontrol motor kanan
-int enB = 12;  // Pin PWM
-int in3 = 14;
-int in4 = 2;
-
-int speedTank = 200;
-
-void maju(int kecepatan) {
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, HIGH);
-  digitalWrite(in4, LOW);
-  ledcWrite(6, kecepatan);  // PWM untuk motor kiri
-}
-
-void mundur(int kecepatan) {
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, HIGH);
-  ledcWrite(6, kecepatan);  // PWM untuk motor kiri
-}
-
-void belokKanan(int kecepatan) {
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, HIGH);
-  digitalWrite(in4, LOW);
-  ledcWrite(6, kecepatan - 25);  // PWM untuk motor kiri
-}
-
-void belokKiri(int kecepatan) {
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, HIGH);
-  ledcWrite(6, kecepatan -25 );  // PWM untuk motor kiri
-}
-
-void stop() {
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, LOW);
-  ledcWrite(6, 0);  // PWM untuk motor kiri
-}
 
 
 WiFiClient espclient;
@@ -137,7 +86,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print(payloadStr);
   Serial.println();
 
-  if (topicStr == "/tank") {
+  if (topicStr == "/camlightctl") {
     // Parse the payload for this specific topic
     StaticJsonDocument<200> doc;
     DeserializationError error = deserializeJson(doc, payloadStr);
@@ -149,28 +98,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
       return;
     }
 
-    int x = doc["x"];
-    int y = doc["y"];
+    int camlight = doc["camlight"];
+    digitalWrite(LEDPIN,int(camlight));
 
-    if (y < 0) {
-      maju(speedTank);
-      Serial.println("Maju");
-    } else if (y > 0) {
-      mundur(speedTank);
-      Serial.println("Mundur");
-    } else if (x > 0) {
-      belokKanan(speedTank);
-      Serial.println("Belok Kanan");
-    } else if (x < 0) {
-      belokKiri(speedTank);
-      Serial.println("Belok Kiri");
-    } else {
-      stop();
-      Serial.println("STOP");
-    }
-  } else if (topicStr == "/cam") {
-    // Handle another specific topic
-    // ...
   } else {
     Serial.println("Unknown topic");
   }
@@ -189,7 +119,7 @@ void reconnect() {
       // Once connected, publish an announcement...
       // client.publish("outTopic", "hello world");
       // ... and resubscribe
-      client.subscribe("/tank");
+      client.subscribe("/camlightctl");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -327,19 +257,7 @@ void setup() {
   client.setBufferSize(2048);
 
   initCamera();
-
-//  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
-  pinMode(in1, OUTPUT);
-  pinMode(in2, OUTPUT);
-  pinMode(in3, OUTPUT);
-  pinMode(in4, OUTPUT);
-  
-
-  // Konfigurasi PWM untuk motor kiri dan kanan
-  ledcSetup(6, 5000, 8);  // Kanal 0, frekuensi 5000Hz, resolusi 8-bit
-  ledcAttachPin(enA, 6);  // Hubungkan PWM ke pin enA
-
-  stop();
+  pinMode(LEDPIN, OUTPUT);
 
 }
 
